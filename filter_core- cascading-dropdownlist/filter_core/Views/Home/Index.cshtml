@@ -1,0 +1,84 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<ejs-grid id="Grid" dataSource="ViewBag.dataSource" toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel" })" allowPaging="true" height="300">
+    <e-grid-editSettings allowAdding="true" allowDeleting="true" allowEditing="true"></e-grid-editSettings>
+    <e-grid-columns>
+        <e-grid-column field="OrderID" width="110" isPrimaryKey=true></e-grid-column>
+        <e-grid-column field="CustomerID" headerText="CustomerID" width="110"></e-grid-column>
+        <e-grid-column field="ShipCountry" headerText="ShipCountry" foreignKeyField="ShipCountry" foreignKeyValue="Country" dataSource="ViewBag.ShipCountryData" edit="@(new {create="CountryCreate",read="CountryRead",write="CountryWrite",destroy="CountryDestroy" })" width="110"> </e-grid-column>
+        <e-grid-column field="ShipCity" headerText="Ship City" foreignKeyField="ShipCity" foreignKeyValue="City" dataSource="ViewBag.ShipCityData" edit="@(new {create="StateCreate",read="StateRead",write="StateWrite",destroy="StateDestroy" })" width="110">
+
+        </e-grid-column>
+    </e-grid-columns>
+</ejs-grid>
+
+<script>
+
+
+    
+    
+    
+    var countryElem;
+    var countryObj;
+    var stateElem;
+    var stateObj;
+
+    var stateData = new ej.data.DataManager({
+        url: '/Home/CityDataSource',
+        adaptor: new ej.data.UrlAdaptor(),
+    });
+    var countryData = new ej.data.DataManager({
+        url: '/Home/UrlDatasource',
+        adaptor: new ej.data.UrlAdaptor(),
+    });
+    function CountryCreate() {
+
+        countryElem = document.createElement('input');
+        return countryElem;
+    }
+    function CountryRead() {
+         return countryObj.value;
+    }
+    function CountryDestroy() {
+        countryObj.destroy();
+    }
+    function CountryWrite(e) {
+            countryObj = new ej.dropdowns.DropDownList({
+            dataSource: countryData,
+            value: e.rowData.ShipCountry,
+            fields: { value: 'ShipCountry', text: 'Country' },
+                change: function () {                
+                stateObj.enabled = true;
+                var tempQuery = new ej.data.Query().where('ShipCountry', 'equal', countryObj.value);
+                stateObj.query = tempQuery;
+                stateObj.text = null;
+                stateObj.dataBind();
+            },
+            placeholder: 'Select a country',
+            floatLabelType: 'Never'
+        });
+        countryObj.appendTo(countryElem);
+    }
+    function StateCreate() {
+        stateElem = document.createElement('input');
+        return stateElem;
+    }
+    function StateRead() {
+        return stateObj.value;
+    }
+    function StateDestroy() {
+        stateObj.destroy();
+    }
+    function StateWrite(e) {
+            stateObj = new ej.dropdowns.DropDownList({
+            dataSource: stateData,
+            value: e.rowData.ShipCity,
+            fields: { value: 'ShipCity', text: 'City' },
+            enabled: false,
+            placeholder: 'Select a state',
+            floatLabelType: 'Never'
+        });
+        stateObj.appendTo(stateElem);
+    }
+</script>
